@@ -1,0 +1,8 @@
+textBox_LoadOnnxFileInfo	ProducerName: tf2onnx\\r\\\\n\\Version: 9223372036854775807\\r\\\\n\\Description: \\r\\\\n\\//Input//\\r\\\\n\\ Key: inputimage, \\r\\\\n\\ Value.ElementType: System.Single,\\r\\\\n\\ Value.Dimensions: -1,224,224,1\\r\\\\n\\//Output//\\r\\\\n\\ Key: outputArray,\\r\\\\n\\ Value.ElementType: System.Single,\\r\\\\n\\ Value.Dimensions: -1,128
+textBox_LoadOnnxFileInfo_Size	224,1
+textBox_LoadOnnxFilename	R:\TripletLossModel224.onnx
+textBox_CreateTestImage_Size	224,224
+textBox_CreateTestImage_imgCount	50
+textBox_CreateTestImage_TargetDir	R:\testImg_Line224
+textBox_CreateFileList	R:\train\fileList.csv
+textBox_CreateFileListPath_TargetDir	R:\train
