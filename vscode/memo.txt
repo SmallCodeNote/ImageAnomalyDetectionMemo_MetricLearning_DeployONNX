@@ -1,0 +1,9 @@
+#InstallCommand
+
+py -m pip install -U tf2onnx
+
+
+#ConvertCommand
+
+py -m tf2onnx.convert --saved-model "R:\modelResult" --output "R:\TripletLossModel.onnx"
+
