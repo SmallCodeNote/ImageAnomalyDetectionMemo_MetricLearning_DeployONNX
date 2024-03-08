@@ -9,6 +9,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using System.Windows.Forms.DataVisualization.Charting;
 
 using Microsoft.ML;
 using Microsoft.ML.Data;
@@ -83,11 +84,10 @@ namespace DeployONNX
 
             string ext = ".png";
 
-
-            createTestImage_Line(Path.Combine(topDirectoryPath, "00", "OK" + ext), imageSizeString, 50, 0);
-            createTestImage_Line(Path.Combine(topDirectoryPath, "01", "NG" + ext), imageSizeString, 50, 1);
-
-
+            createTestImage_Line(Path.Combine(topDirectoryPath, "00", "OK" + ext), imageSizeString, imgCount, 0);
+            createTestImage_Line(Path.Combine(topDirectoryPath, "01", "NG" + ext), imageSizeString, imgCount, 1);
+            createTestImage_Line(Path.Combine(topDirectoryPath, "02", "NG" + ext), imageSizeString, imgCount, 2);
+            createTestImage_Line(Path.Combine(topDirectoryPath, "03", "NG" + ext), imageSizeString, imgCount, 3);
 
         }
 
@@ -126,14 +126,14 @@ namespace DeployONNX
                     {
 
                         // 黒い塗りつぶされた円の描画
-                        double dx = (p2.X - p1.X) / (double)(dotCount)/2;
-                        double dy = (p2.Y - p1.Y) / (double)(dotCount)/2;
-                        for (int i = -dotCount / 2 ; i <= dotCount/2; i++)
+                        double dx = (p2.X - p1.X) / (double)(dotCount + 1.0);
+                        double dy = (p2.Y - p1.Y) / (double)(dotCount + 1.0);
+                        for (int i = 1; i <= dotCount; i++)
                         {
                             int dotDiameter = (int)(10 * rnd.NextDouble());
                             if (dotDiameter < thickness * 4) dotDiameter = thickness * 4;
 
-                            OpenCvSharp.Point center = new OpenCvSharp.Point(p0.X + (i) * dx, p0.Y + (i) * dy);
+                            OpenCvSharp.Point center = new OpenCvSharp.Point(p1.X + (double)(i) * dx, p1.Y + (double)(i) * dy);
                             //center = new OpenCvSharp.Point(p0.X, p0.Y);
 
                             img.Circle(center, dotDiameter / 2, Scalar.Black, -1);
@@ -262,7 +262,7 @@ namespace DeployONNX
             if (ofd.ShowDialog() != DialogResult.OK) return;
 
             string modelPath = ofd.FileName;
-            textBox_LoadOnnxFilename.Text = modelPath;
+            textBox_LoadOnnx224Filename.Text = modelPath;
 
             List<string> Lines = new List<string>();
 
@@ -295,7 +295,7 @@ namespace DeployONNX
 
         private void button_ONNX_Prediction_Click(object sender, EventArgs e)
         {
-            string modelPath = textBox_LoadOnnxFilename.Text;
+            string modelPath = textBox_LoadOnnx224Filename.Text;
 
             OpenFileDialog ofd = new OpenFileDialog();
             ofd.Filter = "PNG|*.png";
@@ -376,29 +376,6 @@ namespace DeployONNX
 
         }
 
-        private void button_ONNX_Prediction2_Click(object sender, EventArgs e)
-        {
-            OpenFileDialog ofd = new OpenFileDialog();
-            ofd.Filter = "PNG|*.png";
-            if (ofd.ShowDialog() != DialogResult.OK) return;
-
-            setPictureBox(pictureBox1, new Bitmap(ofd.FileName));
-
-            var mlContext = new MLContext();
-
-            List<InputData> inputDatas = new List<InputData>();
-            inputDatas.Add(new InputData(ofd.FileName));
-
-            var data = mlContext.Data.LoadFromEnumerable(inputDatas);
-
-            var pipeline = mlContext.Transforms.ApplyOnnxModel(textBox_LoadOnnxFilename.Text);
-
-            var transformedData = pipeline.Fit(data).Transform(data);
-
-            var predictions = mlContext.Data.CreateEnumerable<ImageNetPrediction>(transformedData, reuseRowObject: false).ToList();
-
-
-        }
 
         private void button_CreateFileList_Click(object sender, EventArgs e)
         {
@@ -428,9 +405,244 @@ namespace DeployONNX
                 textBox_CreateFileList.Text = sfd.FileName;
             }
         }
+
+        private void button_ONNX_Prediction2_Click(object sender, EventArgs e)
+        {
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "PNG|*.png";
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            setPictureBox(pictureBox1, new Bitmap(ofd.FileName));
+
+            var mlContext = new MLContext();
+
+            List<InputData224> inputDatas = new List<InputData224>();
+            inputDatas.Add(new InputData224(ofd.FileName));
+
+            var data = mlContext.Data.LoadFromEnumerable(inputDatas);
+
+            var pipeline = mlContext.Transforms.ApplyOnnxModel(textBox_LoadOnnx224Filename.Text);
+
+            var transformedData = pipeline.Fit(data).Transform(data);
+
+            var predictions = mlContext.Data.CreateEnumerable<ImageNetPrediction>(transformedData, reuseRowObject: false).ToList();
+
+
+            // チャートエリアの追加
+            chart_Prediction.ChartAreas.Clear();
+            chart_Prediction.ChartAreas.Add(new ChartArea("Area1"));
+
+            // シリーズの追加
+            Series series = new Series("Series1");
+            series.ChartType = SeriesChartType.Column; // 折れ線グラフから棒グラフに変更
+            chart_Prediction.Series.Clear();
+            chart_Prediction.Series.Add(series);
+
+            // データの追加
+            for (int i = 0; i < predictions[0].Features.Length; i++)
+            {
+                series.Points.AddY(predictions[0].Features[i]);
+            }
+
+            chart_Prediction.Update();
+
+        }
+        int ONNX_Prediction28Count = 0;
+        private void button_ONNX_Prediction28_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "PNG|*.png";
+            ofd.Multiselect = true;
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            setPictureBox(pictureBox1, new Bitmap(ofd.FileName));
+
+            var mlContext = new MLContext();
+
+            string onnxFilename = "";
+
+            //List<IInputData> inputDatas = new List<IInputData>();
+            IDataView data;
+
+            if (sender == button_ONNX_Prediction224)
+            {
+                onnxFilename = textBox_LoadOnnx224Filename.Text;
+
+                List<InputData224> inputDatas = new List<InputData224>();
+
+                foreach (var filename in ofd.FileNames)
+                {
+                    inputDatas.Add(new InputData224(filename));
+                }
+                data = mlContext.Data.LoadFromEnumerable(inputDatas);
+
+            }
+            else if (sender == button_ONNX_Prediction28)
+            {
+                onnxFilename = textBox_LoadOnnx28Filename.Text;
+
+                List<InputData28> inputDatas = new List<InputData28>();
+                foreach (var filename in ofd.FileNames)
+                {
+                    inputDatas.Add(new InputData28(filename));
+                }
+                data = mlContext.Data.LoadFromEnumerable(inputDatas);
+
+            }
+            else
+            {
+                return;
+            }
+
+            var pipeline = mlContext.Transforms.ApplyOnnxModel(onnxFilename);
+            var transformedData = pipeline.Fit(data).Transform(data);
+            var predictions = mlContext.Data.CreateEnumerable<ImageNetPrediction>(transformedData, reuseRowObject: false).ToList();
+
+            // チャートエリアの追加
+            chart_Prediction.ChartAreas.Clear();
+            chart_Prediction.ChartAreas.Add(new ChartArea("Area1"));
+
+            chart_Prediction.Series.Clear();
+
+            List<double> distanceList = new List<double>();
+
+            foreach (var prediction in predictions)
+            {
+                // シリーズの追加
+                Series series = new Series("Series" + ONNX_Prediction28Count.ToString());
+                series.ChartType = SeriesChartType.Column; // 折れ線グラフから棒グラフに変更
+                chart_Prediction.Series.Add(series);
+
+                // データの追加
+                for (int i = 0; i < prediction.Features.Length; i++)
+                {
+                    series.Points.AddY(prediction.Features[i]);
+                }
+
+                distanceList.Add(distance(prediction.Features, predictions[0].Features));
+
+                ONNX_Prediction28Count++;
+            }
+
+            chart_Prediction.Update();
+
+
+            {
+
+                // チャートエリアの追加
+                chart_PredictionDistance.ChartAreas.Clear();
+                chart_PredictionDistance.ChartAreas.Add(new ChartArea("Area1"));
+
+                chart_PredictionDistance.Series.Clear();
+
+                // シリーズの追加
+                Series series = new Series("Series");
+                series.ChartType = SeriesChartType.Column; // 折れ線グラフから棒グラフに変更
+                chart_PredictionDistance.Series.Add(series);
+
+
+                // データの追加
+                for (int i = 0; i < distanceList.Count; i++)
+                {
+                    series.Points.AddY(distanceList[i]);
+                }
+
+            }
+
+
+            chart_PredictionDistance.Update();
+
+        }
+
+
+        private double distance(float[] a, float[] b)
+        {
+            double r = 0;
+            for (int i = 0; i < a.Length; i++)
+            {
+                r += Math.Pow(a[i] - b[i], 2);
+            }
+
+            return Math.Sqrt(r);
+        }
+
+        private void button_ONNX_Prediction224List_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+            string onnxFilename = "";
+
+            if (sender == button_ONNX_Prediction224)
+            {
+                onnxFilename = textBox_LoadOnnx224Filename.Text;
+            }
+            else if (sender == button_ONNX_Prediction28)
+            {
+                onnxFilename = textBox_LoadOnnx28Filename.Text;
+            }
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "PNG|*.png";
+            ofd.Multiselect = true;
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            var mlContext = new MLContext();
+
+            List<InputData28> inputDatas = new List<InputData28>();
+            inputDatas.Add(new InputData28(ofd.FileName));
+
+            var data = mlContext.Data.LoadFromEnumerable(inputDatas);
+
+            var pipeline = mlContext.Transforms.ApplyOnnxModel(textBox_LoadOnnx224Filename.Text);
+
+            var transformedData = pipeline.Fit(data).Transform(data);
+
+            var predictions = mlContext.Data.CreateEnumerable<ImageNetPrediction>(transformedData, reuseRowObject: false).ToList();
+
+            // チャートエリアの追加
+            chart_Prediction.ChartAreas.Clear();
+            chart_Prediction.ChartAreas.Add(new ChartArea("Area1"));
+
+            // シリーズの追加
+            Series series = new Series("Series" + ONNX_Prediction28Count.ToString());
+            series.ChartType = SeriesChartType.Column; // 折れ線グラフから棒グラフに変更
+            chart_Prediction.Series.Clear();
+            chart_Prediction.Series.Add(series);
+
+            // データの追加
+            for (int i = 0; i < predictions[0].Features.Length; i++)
+            {
+                series.Points.AddY(predictions[0].Features[i]);
+            }
+
+            chart_Prediction.Update();
+
+            ONNX_Prediction28Count++;
+
+        }
+
     }
 
-    public class InputData
+    public class ImageNetPrediction
+    {
+
+        [VectorType(1, 128)]
+        [ColumnName("outputArray")]
+        public float[] Features { get; set; }
+
+
+    }
+
+    public interface IInputData
+    {
+        [ColumnName("inputimage")]
+        float[] Features { get; set; }
+
+        //float[] ConvertImage(Bitmap image);
+    }
+
+    public class InputData224 : IInputData
     {
         private int imageSize = 224;
 
@@ -438,8 +650,7 @@ namespace DeployONNX
         [ColumnName("inputimage")]
         public float[] Features { get; set; }
 
-
-        public InputData(string imagePath)
+        public InputData224(string imagePath)
         {
             var bitmap = new Bitmap(Image.FromFile(imagePath));
             Features = ConvertImage(bitmap);
@@ -454,7 +665,7 @@ namespace DeployONNX
                 for (int x = 0; x < resized.Width; x++)
                 {
                     var color = resized.GetPixel(x, y);
-                    data[y * resized.Width + x] = color.R;
+                    data[y * resized.Width + x] = ((float)(color.G));
                     //data[y * resized.Width + x + imageSize * imageSize] = color.G;
                     //data[y * resized.Width + x + 2 * imageSize * imageSize] = color.B;
                 }
@@ -464,14 +675,39 @@ namespace DeployONNX
 
     }
 
-    public class ImageNetPrediction
+
+    public class InputData28 : IInputData
     {
-        
-        [VectorType(1,128)]
-        [ColumnName("outputArray")]
+        private int imageSize = 28;
+
+        [VectorType(1, 28, 28, 1)]
+        [ColumnName("inputimage")]
         public float[] Features { get; set; }
 
-       
+        public InputData28(string imagePath)
+        {
+            var bitmap = new Bitmap(Image.FromFile(imagePath));
+            Features = ConvertImage(bitmap);
+        }
+
+        private float[] ConvertImage(Bitmap image)
+        {
+            var resized = new Bitmap(image, new System.Drawing.Size(imageSize, imageSize));
+            var data = new float[1 * imageSize * imageSize];
+            for (int y = 0; y < resized.Height; y++)
+            {
+                for (int x = 0; x < resized.Width; x++)
+                {
+                    var color = resized.GetPixel(x, y);
+                    data[y * resized.Width + x] = ((float)(color.G));
+
+                }
+            }
+            return data;
+        }
+
     }
+
+
 
 }
