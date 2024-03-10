@@ -749,7 +749,7 @@ namespace DeployONNX
 
                 }
 
-                if (anchorFeatureList.Count == anchorCount)
+                if (anchorFeatureList.Count == anchorCount && panel_Prediction_Result.Controls.Count==0)
                 {
                     anchorFeatureAverage = getAverageFloatArray(anchorFeatureList, anchorCount);
                 }
