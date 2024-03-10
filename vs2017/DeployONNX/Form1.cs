@@ -85,9 +85,52 @@ namespace DeployONNX
             string ext = ".png";
 
             createTestImage_Line(Path.Combine(topDirectoryPath, "00", "OK" + ext), imageSizeString, imgCount, 0);
-            createTestImage_Line(Path.Combine(topDirectoryPath, "01", "NG" + ext), imageSizeString, imgCount, 1);
-            createTestImage_Line(Path.Combine(topDirectoryPath, "02", "NG" + ext), imageSizeString, imgCount, 2);
-            createTestImage_Line(Path.Combine(topDirectoryPath, "03", "NG" + ext), imageSizeString, imgCount, 3);
+            createTestImage_Line(Path.Combine(topDirectoryPath, "01", "NG1" + ext), imageSizeString, imgCount / 3, 1);
+            createTestImage_Line(Path.Combine(topDirectoryPath, "01", "NG2" + ext), imageSizeString, imgCount / 3, 2);
+            createTestImage_Line(Path.Combine(topDirectoryPath, "01", "NG3" + ext), imageSizeString, imgCount / 3, 3);
+            createTestImage_NoizeDot(Path.Combine(topDirectoryPath, "02", "BK" + ext), imageSizeString, imgCount, 16);
+
+        }
+
+        private void createTestImage_NoizeDot(string filename, string imageSize, int imgCount, int dotCount)
+        {
+            string topDirectoryPath = Path.GetDirectoryName(filename);
+            if (!Directory.Exists(topDirectoryPath)) Directory.CreateDirectory(topDirectoryPath);
+
+            string[] sizeArray = imageSize.Trim(',').Split(',');
+
+            int imgWidth = int.Parse(sizeArray[0]);
+            int imgHeight = int.Parse(sizeArray[1]);
+
+            Random rnd = new Random();
+
+            for (int imgIndex = 0; imgIndex < imgCount; imgIndex++)
+            {
+                // 画像の生成
+                using (Mat img = new Mat(224, 224, MatType.CV_8UC1, Scalar.Black))
+                {
+                    for (int i = 0; i < dotCount; i++)
+                    {
+                        double cx = (float)(imgWidth / 2.0 + (rnd.NextDouble() - 0.5) * imgWidth / 2.0);
+                        double cy = (float)(imgHeight / 2.0 + (rnd.NextDouble() - 0.5) * imgHeight / 2.0);
+                        OpenCvSharp.Point p0 = new OpenCvSharp.Point(cx, cy);
+
+                        double b = rnd.NextDouble() * 128.0 + 127.0;
+                        Scalar scalar = new Scalar(b, b, b);
+
+                        int dotDiameter = (int)((rnd.NextDouble()) * imgWidth / 8.0 + imgWidth / 8.0);
+
+                        img.Circle(p0, dotDiameter / 2, scalar, -1);
+
+                    }
+
+                    // 画像の保存
+                    string saveFilename = Path.Combine(Path.GetDirectoryName(filename), Path.GetFileNameWithoutExtension(filename) + imgIndex.ToString("0000") + Path.GetExtension(filename));
+                    img.SaveImage(saveFilename);
+
+                }
+
+            }
 
         }
 
@@ -293,7 +336,7 @@ namespace DeployONNX
 
         }
 
-        private void button_ONNX_Prediction_Click(object sender, EventArgs e)
+        private void button_ONNX_Prediction224_Click(object sender, EventArgs e)
         {
             string modelPath = textBox_LoadOnnx224Filename.Text;
 
@@ -447,8 +490,12 @@ namespace DeployONNX
             chart_Prediction.Update();
 
         }
-        int ONNX_Prediction28Count = 0;
         private void button_ONNX_Prediction28_Click(object sender, EventArgs e)
+        {
+        }
+
+        int ONNX_Prediction28Count = 0;
+        private void button_ONNX_Prediction_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
 
@@ -468,7 +515,7 @@ namespace DeployONNX
 
             if (sender == button_ONNX_Prediction224)
             {
-                onnxFilename = textBox_LoadOnnx224Filename.Text;
+                onnxFilename = textBox_LoadOnnx224Filename.Text.Replace("\"", "");
 
                 List<InputData224> inputDatas = new List<InputData224>();
 
@@ -481,7 +528,7 @@ namespace DeployONNX
             }
             else if (sender == button_ONNX_Prediction28)
             {
-                onnxFilename = textBox_LoadOnnx28Filename.Text;
+                onnxFilename = textBox_LoadOnnx28Filename.Text.Replace("\"", "");
 
                 List<InputData28> inputDatas = new List<InputData28>();
                 foreach (var filename in ofd.FileNames)
@@ -568,6 +615,16 @@ namespace DeployONNX
             return Math.Sqrt(r);
         }
 
+        private float[] getAverageFloatArray(List<float[]> listFloatArray, int num, int startIndex = 0)
+        {
+            int a = startIndex;
+            int b = a + num;
+            int length = listFloatArray[0].Length;
+            return Enumerable.Range(0, length).Select(j => listFloatArray.Skip(a).Take(b - a + 1).Average(arr => arr[j])).ToArray();
+        }
+
+
+
         private void button_ONNX_Prediction224List_Click(object sender, EventArgs e)
         {
             Button button = (Button)sender;
@@ -619,6 +676,99 @@ namespace DeployONNX
             chart_Prediction.Update();
 
             ONNX_Prediction28Count++;
+
+        }
+
+        private void button_Prediction_Run_Click(object sender, EventArgs e)
+        {
+            Button button = (Button)sender;
+
+            OpenFileDialog ofd = new OpenFileDialog();
+            ofd.Filter = "PNG|*.png";
+            ofd.Multiselect = true;
+            if (ofd.ShowDialog() != DialogResult.OK) return;
+
+            var mlContext = new MLContext();
+
+            string onnxFilename = "";
+            IDataView data;
+
+            onnxFilename = textBox_Prediction_OnnxFilePath.Text.Replace("\"", "");
+
+            List<InputData224> inputDatas = new List<InputData224>();
+            List<string> inputFilePathList = new List<string>();
+
+
+            foreach (var filename in Directory.GetFiles(textBox_Prediction_AnchorDataDirectoryPath.Text.Replace("\"", ""), "*.png", SearchOption.AllDirectories))
+            {
+                inputDatas.Add(new InputData224(filename));
+                inputFilePathList.Add(filename);
+            }
+
+            int anchorCount = inputFilePathList.Count;
+
+            foreach (var filename in ofd.FileNames)
+            {
+                inputDatas.Add(new InputData224(filename));
+                inputFilePathList.Add(filename);
+            }
+
+            data = mlContext.Data.LoadFromEnumerable(inputDatas);
+
+            var pipeline = mlContext.Transforms.ApplyOnnxModel(onnxFilename);
+            var transformedData = pipeline.Fit(data).Transform(data);
+            var predictions = mlContext.Data.CreateEnumerable<ImageNetPrediction>(transformedData, reuseRowObject: false).ToList();
+
+
+            List<float[]> anchorFeatureList = new List<float[]>();
+            float[] anchorFeatureAverage = new float[128];
+            List<double> distanceList = new List<double>();
+
+            panel_Prediction_Result.Controls.Clear();
+            panel_Prediction_Result.Height = 0;
+
+            for (int fileIndex = 0; fileIndex < inputFilePathList.Count; fileIndex++)
+            {
+                var prediction = predictions[fileIndex];
+                var inputFilePath = inputFilePathList[fileIndex];
+
+                if (anchorFeatureList.Count < anchorCount)
+                {
+                    anchorFeatureList.Add(prediction.Features);
+                }
+                else
+                {
+                    double distanceValue = distance(anchorFeatureAverage, prediction.Features);
+                    distanceList.Add(distanceValue);
+                    var formIns = new ResultForm(new Bitmap(inputFilePath), Path.GetFileNameWithoutExtension(inputFilePath), distanceValue);
+                    formIns.Top = panel_Prediction_Result.Height;
+
+                    panel_Prediction_Result.Controls.Add(formIns);
+                    panel_Prediction_Result.Height += formIns.Height;
+
+
+                }
+
+                if (anchorFeatureList.Count == anchorCount)
+                {
+                    anchorFeatureAverage = getAverageFloatArray(anchorFeatureList, anchorCount);
+                }
+
+            }
+
+            double distanceValueMax = distanceList.Max()*1.2;
+
+
+
+            foreach (var item in panel_Prediction_Result.Controls)
+            {
+                if (item is ResultForm)
+                {
+                    ((ResultForm)item).distanceMax = distanceValueMax;
+                }
+            }
+
+            panel_Prediction_ResultFrame.Update();
 
         }
 

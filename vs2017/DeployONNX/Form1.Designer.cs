@@ -28,14 +28,15 @@
         /// </summary>
         private void InitializeComponent()
         {
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea2 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend2 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series2 = new System.Windows.Forms.DataVisualization.Charting.Series();
-            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea1 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
-            System.Windows.Forms.DataVisualization.Charting.Legend legend1 = new System.Windows.Forms.DataVisualization.Charting.Legend();
-            System.Windows.Forms.DataVisualization.Charting.Series series1 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea3 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend3 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series3 = new System.Windows.Forms.DataVisualization.Charting.Series();
+            System.Windows.Forms.DataVisualization.Charting.ChartArea chartArea4 = new System.Windows.Forms.DataVisualization.Charting.ChartArea();
+            System.Windows.Forms.DataVisualization.Charting.Legend legend4 = new System.Windows.Forms.DataVisualization.Charting.Legend();
+            System.Windows.Forms.DataVisualization.Charting.Series series4 = new System.Windows.Forms.DataVisualization.Charting.Series();
             this.tabControl1 = new System.Windows.Forms.TabControl();
             this.tabPage_ONNX = new System.Windows.Forms.TabPage();
+            this.chart_PredictionDistance = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.chart_Prediction = new System.Windows.Forms.DataVisualization.Charting.Chart();
             this.pictureBox2 = new System.Windows.Forms.PictureBox();
             this.pictureBox1 = new System.Windows.Forms.PictureBox();
@@ -61,15 +62,24 @@
             this.textBox_CreateFileList = new System.Windows.Forms.TextBox();
             this.textBox_CreateFileListPath_TargetDir = new System.Windows.Forms.TextBox();
             this.button_CreateFileList = new System.Windows.Forms.Button();
-            this.chart_PredictionDistance = new System.Windows.Forms.DataVisualization.Charting.Chart();
+            this.tabPage1 = new System.Windows.Forms.TabPage();
+            this.button_Prediction_Run = new System.Windows.Forms.Button();
+            this.panel_Prediction_ResultFrame = new System.Windows.Forms.Panel();
+            this.panel_Prediction_Result = new System.Windows.Forms.Panel();
+            this.label5 = new System.Windows.Forms.Label();
+            this.label_Prediction_OnnxFilePath = new System.Windows.Forms.Label();
+            this.textBox_Prediction_AnchorDataDirectoryPath = new System.Windows.Forms.TextBox();
+            this.textBox_Prediction_OnnxFilePath = new System.Windows.Forms.TextBox();
             this.tabControl1.SuspendLayout();
             this.tabPage_ONNX.SuspendLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart_PredictionDistance)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart_Prediction)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).BeginInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).BeginInit();
             this.tabPage_CreateTestImage.SuspendLayout();
             this.tabPage_CreateFileList.SuspendLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chart_PredictionDistance)).BeginInit();
+            this.tabPage1.SuspendLayout();
+            this.panel_Prediction_ResultFrame.SuspendLayout();
             this.SuspendLayout();
             // 
             // tabControl1
@@ -77,6 +87,7 @@
             this.tabControl1.Controls.Add(this.tabPage_ONNX);
             this.tabControl1.Controls.Add(this.tabPage_CreateTestImage);
             this.tabControl1.Controls.Add(this.tabPage_CreateFileList);
+            this.tabControl1.Controls.Add(this.tabPage1);
             this.tabControl1.Dock = System.Windows.Forms.DockStyle.Fill;
             this.tabControl1.Location = new System.Drawing.Point(0, 0);
             this.tabControl1.Name = "tabControl1";
@@ -108,18 +119,34 @@
             this.tabPage_ONNX.Text = "ONNX";
             this.tabPage_ONNX.UseVisualStyleBackColor = true;
             // 
+            // chart_PredictionDistance
+            // 
+            chartArea3.Name = "ChartArea1";
+            this.chart_PredictionDistance.ChartAreas.Add(chartArea3);
+            legend3.Name = "Legend1";
+            this.chart_PredictionDistance.Legends.Add(legend3);
+            this.chart_PredictionDistance.Location = new System.Drawing.Point(769, 26);
+            this.chart_PredictionDistance.Name = "chart_PredictionDistance";
+            series3.ChartArea = "ChartArea1";
+            series3.Legend = "Legend1";
+            series3.Name = "Series1";
+            this.chart_PredictionDistance.Series.Add(series3);
+            this.chart_PredictionDistance.Size = new System.Drawing.Size(387, 300);
+            this.chart_PredictionDistance.TabIndex = 7;
+            this.chart_PredictionDistance.Text = "chart1";
+            // 
             // chart_Prediction
             // 
-            chartArea2.Name = "ChartArea1";
-            this.chart_Prediction.ChartAreas.Add(chartArea2);
-            legend2.Name = "Legend1";
-            this.chart_Prediction.Legends.Add(legend2);
+            chartArea4.Name = "ChartArea1";
+            this.chart_Prediction.ChartAreas.Add(chartArea4);
+            legend4.Name = "Legend1";
+            this.chart_Prediction.Legends.Add(legend4);
             this.chart_Prediction.Location = new System.Drawing.Point(13, 366);
             this.chart_Prediction.Name = "chart_Prediction";
-            series2.ChartArea = "ChartArea1";
-            series2.Legend = "Legend1";
-            series2.Name = "Series1";
-            this.chart_Prediction.Series.Add(series2);
+            series4.ChartArea = "ChartArea1";
+            series4.Legend = "Legend1";
+            series4.Name = "Series1";
+            this.chart_Prediction.Series.Add(series4);
             this.chart_Prediction.Size = new System.Drawing.Size(1143, 243);
             this.chart_Prediction.TabIndex = 6;
             this.chart_Prediction.Text = "chart1";
@@ -168,7 +195,7 @@
             // 
             // button_ONNX_Prediction224List
             // 
-            this.button_ONNX_Prediction224List.Location = new System.Drawing.Point(637, 24);
+            this.button_ONNX_Prediction224List.Location = new System.Drawing.Point(638, 24);
             this.button_ONNX_Prediction224List.Name = "button_ONNX_Prediction224List";
             this.button_ONNX_Prediction224List.Size = new System.Drawing.Size(113, 23);
             this.button_ONNX_Prediction224List.TabIndex = 2;
@@ -184,7 +211,7 @@
             this.button_ONNX_Prediction28.TabIndex = 2;
             this.button_ONNX_Prediction28.Text = "Prediction28";
             this.button_ONNX_Prediction28.UseVisualStyleBackColor = true;
-            this.button_ONNX_Prediction28.Click += new System.EventHandler(this.button_ONNX_Prediction28_Click);
+            this.button_ONNX_Prediction28.Click += new System.EventHandler(this.button_ONNX_Prediction_Click);
             // 
             // button_ONNX_Prediction224
             // 
@@ -194,7 +221,7 @@
             this.button_ONNX_Prediction224.TabIndex = 2;
             this.button_ONNX_Prediction224.Text = "Prediction224";
             this.button_ONNX_Prediction224.UseVisualStyleBackColor = true;
-            this.button_ONNX_Prediction224.Click += new System.EventHandler(this.button_ONNX_Prediction2_Click);
+            this.button_ONNX_Prediction224.Click += new System.EventHandler(this.button_ONNX_Prediction_Click);
             // 
             // button_LoadOnnxFile
             // 
@@ -342,21 +369,79 @@
             this.button_CreateFileList.UseVisualStyleBackColor = true;
             this.button_CreateFileList.Click += new System.EventHandler(this.button_CreateFileList_Click);
             // 
-            // chart_PredictionDistance
+            // tabPage1
             // 
-            chartArea1.Name = "ChartArea1";
-            this.chart_PredictionDistance.ChartAreas.Add(chartArea1);
-            legend1.Name = "Legend1";
-            this.chart_PredictionDistance.Legends.Add(legend1);
-            this.chart_PredictionDistance.Location = new System.Drawing.Point(769, 26);
-            this.chart_PredictionDistance.Name = "chart_PredictionDistance";
-            series1.ChartArea = "ChartArea1";
-            series1.Legend = "Legend1";
-            series1.Name = "Series1";
-            this.chart_PredictionDistance.Series.Add(series1);
-            this.chart_PredictionDistance.Size = new System.Drawing.Size(387, 300);
-            this.chart_PredictionDistance.TabIndex = 7;
-            this.chart_PredictionDistance.Text = "chart1";
+            this.tabPage1.Controls.Add(this.button_Prediction_Run);
+            this.tabPage1.Controls.Add(this.panel_Prediction_ResultFrame);
+            this.tabPage1.Controls.Add(this.label5);
+            this.tabPage1.Controls.Add(this.label_Prediction_OnnxFilePath);
+            this.tabPage1.Controls.Add(this.textBox_Prediction_AnchorDataDirectoryPath);
+            this.tabPage1.Controls.Add(this.textBox_Prediction_OnnxFilePath);
+            this.tabPage1.Location = new System.Drawing.Point(4, 22);
+            this.tabPage1.Name = "tabPage1";
+            this.tabPage1.Padding = new System.Windows.Forms.Padding(3);
+            this.tabPage1.Size = new System.Drawing.Size(1164, 632);
+            this.tabPage1.TabIndex = 3;
+            this.tabPage1.Text = "Prediction";
+            this.tabPage1.UseVisualStyleBackColor = true;
+            // 
+            // button_Prediction_Run
+            // 
+            this.button_Prediction_Run.Location = new System.Drawing.Point(468, 77);
+            this.button_Prediction_Run.Name = "button_Prediction_Run";
+            this.button_Prediction_Run.Size = new System.Drawing.Size(68, 27);
+            this.button_Prediction_Run.TabIndex = 5;
+            this.button_Prediction_Run.Text = "Run";
+            this.button_Prediction_Run.UseVisualStyleBackColor = true;
+            this.button_Prediction_Run.Click += new System.EventHandler(this.button_Prediction_Run_Click);
+            // 
+            // panel_Prediction_ResultFrame
+            // 
+            this.panel_Prediction_ResultFrame.AutoScroll = true;
+            this.panel_Prediction_ResultFrame.Controls.Add(this.panel_Prediction_Result);
+            this.panel_Prediction_ResultFrame.Location = new System.Drawing.Point(17, 121);
+            this.panel_Prediction_ResultFrame.Name = "panel_Prediction_ResultFrame";
+            this.panel_Prediction_ResultFrame.Size = new System.Drawing.Size(520, 495);
+            this.panel_Prediction_ResultFrame.TabIndex = 4;
+            // 
+            // panel_Prediction_Result
+            // 
+            this.panel_Prediction_Result.Location = new System.Drawing.Point(0, 0);
+            this.panel_Prediction_Result.Name = "panel_Prediction_Result";
+            this.panel_Prediction_Result.Size = new System.Drawing.Size(493, 163);
+            this.panel_Prediction_Result.TabIndex = 0;
+            // 
+            // label5
+            // 
+            this.label5.AutoSize = true;
+            this.label5.Location = new System.Drawing.Point(8, 60);
+            this.label5.Name = "label5";
+            this.label5.Size = new System.Drawing.Size(101, 12);
+            this.label5.TabIndex = 3;
+            this.label5.Text = "anchorDataDirPath";
+            // 
+            // label_Prediction_OnnxFilePath
+            // 
+            this.label_Prediction_OnnxFilePath.AutoSize = true;
+            this.label_Prediction_OnnxFilePath.Location = new System.Drawing.Point(8, 14);
+            this.label_Prediction_OnnxFilePath.Name = "label_Prediction_OnnxFilePath";
+            this.label_Prediction_OnnxFilePath.Size = new System.Drawing.Size(73, 12);
+            this.label_Prediction_OnnxFilePath.TabIndex = 3;
+            this.label_Prediction_OnnxFilePath.Text = "OnnxFilePath";
+            // 
+            // textBox_Prediction_AnchorDataDirectoryPath
+            // 
+            this.textBox_Prediction_AnchorDataDirectoryPath.Location = new System.Drawing.Point(10, 75);
+            this.textBox_Prediction_AnchorDataDirectoryPath.Name = "textBox_Prediction_AnchorDataDirectoryPath";
+            this.textBox_Prediction_AnchorDataDirectoryPath.Size = new System.Drawing.Size(448, 19);
+            this.textBox_Prediction_AnchorDataDirectoryPath.TabIndex = 2;
+            // 
+            // textBox_Prediction_OnnxFilePath
+            // 
+            this.textBox_Prediction_OnnxFilePath.Location = new System.Drawing.Point(10, 29);
+            this.textBox_Prediction_OnnxFilePath.Name = "textBox_Prediction_OnnxFilePath";
+            this.textBox_Prediction_OnnxFilePath.Size = new System.Drawing.Size(448, 19);
+            this.textBox_Prediction_OnnxFilePath.TabIndex = 2;
             // 
             // Form1
             // 
@@ -371,6 +456,7 @@
             this.tabControl1.ResumeLayout(false);
             this.tabPage_ONNX.ResumeLayout(false);
             this.tabPage_ONNX.PerformLayout();
+            ((System.ComponentModel.ISupportInitialize)(this.chart_PredictionDistance)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.chart_Prediction)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox2)).EndInit();
             ((System.ComponentModel.ISupportInitialize)(this.pictureBox1)).EndInit();
@@ -378,7 +464,9 @@
             this.tabPage_CreateTestImage.PerformLayout();
             this.tabPage_CreateFileList.ResumeLayout(false);
             this.tabPage_CreateFileList.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)(this.chart_PredictionDistance)).EndInit();
+            this.tabPage1.ResumeLayout(false);
+            this.tabPage1.PerformLayout();
+            this.panel_Prediction_ResultFrame.ResumeLayout(false);
             this.ResumeLayout(false);
 
         }
@@ -413,6 +501,14 @@
         private System.Windows.Forms.Button button_ONNX_Prediction28List;
         private System.Windows.Forms.Button button_ONNX_Prediction224List;
         private System.Windows.Forms.DataVisualization.Charting.Chart chart_PredictionDistance;
+        private System.Windows.Forms.TabPage tabPage1;
+        private System.Windows.Forms.Label label_Prediction_OnnxFilePath;
+        private System.Windows.Forms.TextBox textBox_Prediction_OnnxFilePath;
+        private System.Windows.Forms.Label label5;
+        private System.Windows.Forms.TextBox textBox_Prediction_AnchorDataDirectoryPath;
+        private System.Windows.Forms.Panel panel_Prediction_ResultFrame;
+        private System.Windows.Forms.Panel panel_Prediction_Result;
+        private System.Windows.Forms.Button button_Prediction_Run;
     }
 }
 
