@@ -12,6 +12,8 @@ import numpy as np
 from tqdm import tqdm
 from sklearn.metrics import euclidean_distances, roc_auc_score
 
+import datetime
+
 def create_mobilenet_v2():
     input = layers.Input((224,224,1),name="inputImage")
     #x = input #layers.UpSampling2D(3)(input)
@@ -117,22 +119,28 @@ def train():
     model = create_mobilenet_v2()
     model.compile(SGD(1e-3, 0.9), triplet_loss)
 
+    log_dir = "logs/fit/" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+    tensorboard_callback = tf.keras.callbacks.TensorBoard(log_dir=log_dir, histogram_freq=1)
+
+
+
+
     # 訓練
     scheduler = LearningRateScheduler(step_decay)
-    checkpoint = ModelCheckpoint("model.hdf5", monitor="loss", save_best_only=True, save_weights_only=True)
-    batch_size = 16 #128
-    epoch_count = 2 #50
+    checkpoint = ModelCheckpoint("model224.hdf5", monitor="loss", save_best_only=True, save_weights_only=True)
+    batch_size = 128 #128
+    epoch_count = 50 #50
     model.fit_generator(train_generator(X_train, y_train, batch_size), steps_per_epoch=X_train.shape[0]//batch_size,
                         callbacks=[checkpoint, scheduler], max_queue_size=1, epochs=epoch_count)
 
     # ベストのモデルを読み込む
-    model.load_weights("model.hdf5")
+    model.load_weights("model224.hdf5")
 
-    model.save(R'R:\modelResult',overwrite=True)
+    model.save(R'R:\model224',overwrite=True)
 
     # embeddingを取る
-    anchor_embeddings = model.predict(X_anchor/255.0, verbose=1) # スニーカー（正常）だけ
-    test_embeddings = model.predict(X_test/255.0, verbose=1) # スニーカー＋ブーツ（異常）
+    anchor_embeddings = model.predict(X_anchor/255.0, verbose=1) # 正常だけ
+    test_embeddings = model.predict(X_test/255.0, verbose=1) # 正常+異常
     # 距離行列
     dist_matrix = np.zeros((test_embeddings.shape[0], anchor_embeddings.shape[0]), np.float32)
     for i in range(dist_matrix.shape[0]):
@@ -157,17 +165,17 @@ def plot_result(test_images, y_test, dists):
     far_boots_ind = np.argsort(dists)[::-1]
     i = 1
     for ind in far_boots_ind:
-        if y_test[ind] == 1.0: continue # スニーカーを除外
+        if y_test[ind] == 0.0: continue # OKを除外
         ax = plt.subplot(4,4,i)
         ax.imshow(test_images[ind,:,:,0])
         ax.axis("off")
         ax.set_title(f"score={dists[ind]:.04}")
         i += 1
         if i == 9: break
-    # スニーカーに酷似したブーツ
+    # NGに酷似
     close_boots_ind = np.argsort(dists)
     for ind in close_boots_ind:
-        if y_test[ind] == 1.0: continue # スニーカーを除外
+        if y_test[ind] == 0.0: continue # OKを除外
         ax = plt.subplot(4,4,i)
         ax.imshow(test_images[ind,:,:,0])
         ax.axis("off")
@@ -179,9 +187,9 @@ def plot_result(test_images, y_test, dists):
 import time
 
 def speed_test(n_anchors):
-    #model = create_mobilenet_v2()
-    #model.load_weights("model.hdf5")
-    model = Model('model')
+    model = create_mobilenet_v2()
+    model.load_weights("model224.hdf5")
+    #model = Model('model')
 
     (_, _), X_anchor, (X_test, y_test) = load_data()
     X_anchor = X_anchor[:n_anchors]
@@ -200,8 +208,8 @@ def speed_test(n_anchors):
 
 def speed_test_with_batch(n_anchors):
     #model = create_mobilenet_v2()
-    #model.load_weights("model.hdf5")
-    model = Model('model')
+    #model.load_weights("model224.hdf5")
+    model = Model('model224')
 
     (_, _), X_anchor, (X_test, y_test) = load_data()
     X_anchor = X_anchor[:n_anchors]
